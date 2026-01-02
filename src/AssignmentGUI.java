@@ -12,19 +12,19 @@ public class AssignmentGUI extends JFrame implements ActionListener {
     private JComboBox<Doctor> cbDoctor;
     private JComboBox<Nurse> cbNurse;
     private JComboBox<String> cbRoomNumber;
-    private JTextField tfStayDuration = new JTextField(10);
+    private JTextField tfStayDuration = UITheme.createTextField(10);
     
     private JRadioButton rbStandard = new JRadioButton("Standard");
     private JRadioButton rbDeluxe = new JRadioButton("Deluxe");
     private JRadioButton rbVIP = new JRadioButton("VIP");
     private ButtonGroup roomGroup = new ButtonGroup();
 
-    private JButton nextButton = new JButton("Next");
+    private JButton nextButton = UITheme.createPrimaryButton("Next");
 
     public AssignmentGUI(Patient patient) {
         this.patient = patient;
         setTitle("Hospital Management - Assignment");
-        setSize(500, 450);
+        setSize(520, 500);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
         initComponents();
@@ -51,35 +51,44 @@ public class AssignmentGUI extends JFrame implements ActionListener {
         cbRoomNumber = new JComboBox<>(roomNumbers);
 
         JPanel mainPanel = new JPanel(new BorderLayout(10, 10));
-        mainPanel.setBorder(new EmptyBorder(20, 20, 20, 20));
+        mainPanel.setBackground(UITheme.BACKGROUND);
+        mainPanel.setBorder(new EmptyBorder(16, 16, 16, 16));
 
-        JPanel formPanel = new JPanel(new GridLayout(6, 2, 10, 10));
+        JPanel header = UITheme.createHeader("Assignment", "Assign a provider, room, and stay duration for " + patient.getName() + ".");
+        mainPanel.add(header, BorderLayout.NORTH);
 
-        formPanel.add(new JLabel("Select Doctor:"));
+        JPanel formPanel = UITheme.createCard(new GridLayout(6, 2, 12, 12));
+
+        formPanel.add(UITheme.createLabel("Select Doctor:"));
         formPanel.add(cbDoctor);
 
-        formPanel.add(new JLabel("Select Nurse:"));
+        formPanel.add(UITheme.createLabel("Select Nurse:"));
         formPanel.add(cbNurse);
 
-        formPanel.add(new JLabel("Room Type:"));
+        formPanel.add(UITheme.createLabel("Room Type:"));
         JPanel roomTypePanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        roomTypePanel.setOpaque(false);
         roomGroup.add(rbStandard);
         roomGroup.add(rbDeluxe);
         roomGroup.add(rbVIP);
+        UITheme.styleToggle(rbStandard);
+        UITheme.styleToggle(rbDeluxe);
+        UITheme.styleToggle(rbVIP);
         roomTypePanel.add(rbStandard);
         roomTypePanel.add(rbDeluxe);
         roomTypePanel.add(rbVIP);
         formPanel.add(roomTypePanel);
 
-        formPanel.add(new JLabel("Room Number:"));
+        formPanel.add(UITheme.createLabel("Room Number:"));
         formPanel.add(cbRoomNumber);
 
-        formPanel.add(new JLabel("Stay Duration (Days):"));
+        formPanel.add(UITheme.createLabel("Stay Duration (Days):"));
         formPanel.add(tfStayDuration);
 
         mainPanel.add(formPanel, BorderLayout.CENTER);
 
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        buttonPanel.setOpaque(false);
         nextButton.addActionListener(this);
         buttonPanel.add(nextButton);
         mainPanel.add(buttonPanel, BorderLayout.SOUTH);
