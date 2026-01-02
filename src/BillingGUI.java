@@ -15,17 +15,19 @@ public class BillingGUI extends JFrame implements ActionListener {
     private Room room;
     private int stayDays;
     private ArrayList<Medication> selectedMeds;
+    private String diagnosis;
 
-    public BillingGUI(Patient patient, Doctor doctor, Nurse nurse, Room room, int stayDays, ArrayList<Medication> selectedMeds) {
+    public BillingGUI(Patient patient, Doctor doctor, Nurse nurse, Room room, int stayDays, ArrayList<Medication> selectedMeds, String diagnosis) {
         this.patient = patient;
         this.doctor = doctor;
         this.nurse = nurse;
         this.room = room;
         this.stayDays = stayDays;
         this.selectedMeds = selectedMeds;
+        this.diagnosis = diagnosis;
 
         setTitle("Hospital Management - Final Billing");
-        setSize(500, 500);
+        setSize(600, 520);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
         initComponents();
@@ -35,10 +37,17 @@ public class BillingGUI extends JFrame implements ActionListener {
         Billing billing = new Billing(doctor, room, stayDays, selectedMeds);
 
         JPanel mainPanel = new JPanel(new BorderLayout(15, 15));
-        mainPanel.setBorder(new EmptyBorder(20, 20, 20, 20));
+        mainPanel.setBackground(UITheme.BACKGROUND);
+        mainPanel.setBorder(new EmptyBorder(16, 16, 16, 16));
 
-        JPanel infoPanel = new JPanel(new GridLayout(0, 2, 10, 10));
-        infoPanel.setBorder(BorderFactory.createTitledBorder("Patient & Stay Summary"));
+        JPanel header = UITheme.createHeader("Final Review", "Confirm patient details and charges before registering.");
+        mainPanel.add(header, BorderLayout.NORTH);
+
+        JPanel infoPanel = UITheme.createCard(new GridLayout(0, 2, 10, 10));
+        infoPanel.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createTitledBorder(BorderFactory.createLineBorder(UITheme.BORDER), "Patient & Stay Summary"),
+            new EmptyBorder(8, 8, 8, 8)
+        ));
 
         addInfoRow(infoPanel, "Patient Name:", patient.getName());
         addInfoRow(infoPanel, "Patient ID:", patient.getID());
@@ -46,29 +55,47 @@ public class BillingGUI extends JFrame implements ActionListener {
         addInfoRow(infoPanel, "Nurse:", nurse.getName());
         addInfoRow(infoPanel, "Room Type:", room.getRoomType());
         addInfoRow(infoPanel, "Stay Duration:", stayDays + " Days");
+        addInfoRow(infoPanel, "Diagnosis:", diagnosis);
 
-        JPanel feePanel = new JPanel(new GridLayout(0, 2, 10, 10));
-        feePanel.setBorder(BorderFactory.createTitledBorder("Billing Details"));
+        JPanel feePanel = UITheme.createCard(new GridLayout(0, 2, 10, 10));
+        feePanel.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createTitledBorder(BorderFactory.createLineBorder(UITheme.BORDER), "Billing Details"),
+            new EmptyBorder(8, 8, 8, 8)
+        ));
 
         addFeeRow(feePanel, "Doctor Fee:", billing.getDoctorFee());
         addFeeRow(feePanel, "Room Fee:", billing.getRoomFee());
         addFeeRow(feePanel, "Medication Fee:", billing.getMedFee());
         
-        JLabel totalLabel = new JLabel("TOTAL AMOUNT:");
-        totalLabel.setFont(new Font("Arial", Font.BOLD, 16));
+        JLabel totalLabel = UITheme.createLabel("TOTAL AMOUNT:");
+        totalLabel.setFont(UITheme.TITLE_FONT);
         JLabel totalValue = new JLabel(String.format("RM %.2f", billing.getTotalFee()));
-        totalValue.setFont(new Font("Arial", Font.BOLD, 16));
-        totalValue.setForeground(Color.RED);
+        totalValue.setFont(UITheme.TITLE_FONT);
+        totalValue.setForeground(UITheme.ACCENT);
         
         feePanel.add(totalLabel);
         feePanel.add(totalValue);
 
-        JPanel centerPanel = new JPanel(new GridLayout(2, 1, 10, 10));
+        JPanel medSummaryPanel = UITheme.createCard(new BorderLayout(8, 8));
+        medSummaryPanel.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createTitledBorder(BorderFactory.createLineBorder(UITheme.BORDER), "Medications"),
+            new EmptyBorder(8, 8, 8, 8)
+        ));
+        JTextArea medArea = new JTextArea();
+        medArea.setEditable(false);
+        medArea.setFont(UITheme.TEXT_FONT);
+        medArea.setBackground(Color.WHITE);
+        medArea.setText(buildMedicationSummary());
+        medSummaryPanel.add(new JScrollPane(medArea), BorderLayout.CENTER);
+
+        JPanel centerPanel = new JPanel(new GridLayout(3, 1, 10, 10));
+        centerPanel.setOpaque(false);
         centerPanel.add(infoPanel);
         centerPanel.add(feePanel);
+        centerPanel.add(medSummaryPanel);
         mainPanel.add(centerPanel, BorderLayout.CENTER);
 
-        JButton finishButton = new JButton("Finish & Register");
+        JButton finishButton = UITheme.createPrimaryButton("Finish & Register");
         finishButton.addActionListener(this);
         mainPanel.add(finishButton, BorderLayout.SOUTH);
 
@@ -76,13 +103,29 @@ public class BillingGUI extends JFrame implements ActionListener {
     }
 
     private void addInfoRow(JPanel panel, String label, String value) {
-        panel.add(new JLabel(label));
-        panel.add(new JLabel(value));
+        panel.add(UITheme.createLabel(label));
+        panel.add(UITheme.createLabel(value));
     }
 
     private void addFeeRow(JPanel panel, String label, double value) {
-        panel.add(new JLabel(label));
-        panel.add(new JLabel(String.format("RM %.2f", value)));
+        panel.add(UITheme.createLabel(label));
+        panel.add(UITheme.createLabel(String.format("RM %.2f", value)));
+    }
+
+    private String buildMedicationSummary() {
+        if (selectedMeds == null || selectedMeds.isEmpty()) {
+            return "No medications selected.";
+        }
+
+        StringBuilder builder = new StringBuilder();
+        for (Medication med : selectedMeds) {
+            builder.append("- ")
+                   .append(med.getName())
+                   .append(" (RM ")
+                   .append(String.format("%.2f", med.getPrice()))
+                   .append(")\n");
+        }
+        return builder.toString();
     }
 
     public void createAndShowGUI() {

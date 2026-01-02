@@ -16,11 +16,11 @@ public class MedicationGUI extends JFrame implements ActionListener {
     private Room room;
     private int stayDays;
 
-    private JTextField tfDiagnosis = new JTextField(20);
+    private JTextField tfDiagnosis = UITheme.createTextField(20);
     private Medication[] medications;
     private JCheckBox[] cbMedications;
 
-    private JButton nextButton = new JButton("Next");
+    private JButton nextButton = UITheme.createPrimaryButton("Next");
 
     public MedicationGUI(Patient patient, Doctor doctor, Nurse nurse, Room room, int stayDays) {
         this.patient = patient;
@@ -30,7 +30,7 @@ public class MedicationGUI extends JFrame implements ActionListener {
         this.stayDays = stayDays;
 
         setTitle("Hospital Management - Medication");
-        setSize(500, 450);
+        setSize(560, 520);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
         initComponents();
@@ -48,22 +48,36 @@ public class MedicationGUI extends JFrame implements ActionListener {
         cbMedications = new JCheckBox[medications.length];
 
         JPanel mainPanel = new JPanel(new BorderLayout(10, 10));
-        mainPanel.setBorder(new EmptyBorder(20, 20, 20, 20));
+        mainPanel.setBackground(UITheme.BACKGROUND);
+        mainPanel.setBorder(new EmptyBorder(16, 16, 16, 16));
 
-        JPanel topPanel = new JPanel(new GridLayout(2, 1, 5, 5));
-        topPanel.add(new JLabel("Diagnosis:"));
+        JPanel header = UITheme.createHeader("Medication & Diagnosis", "Capture diagnosis and select medications for " + patient.getName() + ".");
+        mainPanel.add(header, BorderLayout.NORTH);
+
+        JPanel topPanel = UITheme.createCard(new GridLayout(2, 1, 6, 6));
+        topPanel.add(UITheme.createLabel("Diagnosis:"));
         topPanel.add(tfDiagnosis);
-        mainPanel.add(topPanel, BorderLayout.NORTH);
 
-        JPanel medPanel = new JPanel(new GridLayout(0, 2, 5, 5));
-        medPanel.setBorder(BorderFactory.createTitledBorder("Available Medications"));
+        JPanel medPanel = UITheme.createCard(new GridLayout(0, 2, 8, 8));
+        medPanel.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createTitledBorder(BorderFactory.createLineBorder(UITheme.BORDER), "Available Medications"),
+            new EmptyBorder(8, 8, 8, 8)
+        ));
         for (int i = 0; i < medications.length; i++) {
             cbMedications[i] = new JCheckBox(medications[i].getName() + " (RM " + medications[i].getPrice() + ")");
+            UITheme.styleToggle(cbMedications[i]);
             medPanel.add(cbMedications[i]);
         }
-        mainPanel.add(new JScrollPane(medPanel), BorderLayout.CENTER);
+
+        JPanel centerPanel = new JPanel(new BorderLayout(10, 10));
+        centerPanel.setOpaque(false);
+        centerPanel.add(topPanel, BorderLayout.NORTH);
+        centerPanel.add(new JScrollPane(medPanel), BorderLayout.CENTER);
+
+        mainPanel.add(centerPanel, BorderLayout.CENTER);
 
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        buttonPanel.setOpaque(false);
         nextButton.addActionListener(this);
         buttonPanel.add(nextButton);
         mainPanel.add(buttonPanel, BorderLayout.SOUTH);
@@ -82,6 +96,7 @@ public class MedicationGUI extends JFrame implements ActionListener {
             return;
         }
 
+        String diagnosis = tfDiagnosis.getText().trim();
         ArrayList<Medication> selectedMeds = new ArrayList<>();
         for (int i = 0; i < cbMedications.length; i++) {
             if (cbMedications[i].isSelected()) {
@@ -90,6 +105,6 @@ public class MedicationGUI extends JFrame implements ActionListener {
         }
 
         this.dispose();
-        new BillingGUI(patient, doctor, nurse, room, stayDays, selectedMeds).createAndShowGUI();
+        new BillingGUI(patient, doctor, nurse, room, stayDays, selectedMeds, diagnosis).createAndShowGUI();
     }
 }
